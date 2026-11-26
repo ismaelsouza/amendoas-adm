@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    "lib": ["es2024", "dom", "dom.iterable"],
+    "noEmit": true
+  },
+  "include": ["src/web", "src/contracts"]
+}
