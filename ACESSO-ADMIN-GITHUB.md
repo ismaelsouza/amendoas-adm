@@ -1,5 +1,7 @@
 # Como dar acesso administrativo ao Ismael no GitHub
 
+> Guia histórico. O desenvolvimento passou para [`ismaelsouza/amendoas-adm`](https://github.com/ismaelsouza/amendoas-adm) e [`ismaelsouza/amendoas-app`](https://github.com/ismaelsouza/amendoas-app). A transferência para uma organização do cliente deixou de fazer parte do plano.
+
 Este guia é para quem entra no GitHub como **`prpaulocesarneves-crypto`**. Você vai manter os dois repositórios privados sob controle da Casa das Amêndoas e dar à conta **`ismaelsouza`** acesso para configurar as publicações do painel e do app.
 
 Hoje os repositórios estão na sua conta pessoal. Nesse tipo de conta, o GitHub permite convidar colaboradores, mas não oferece a opção `Admin` para eles. Para dar esse acesso sem entregar a sua conta, transfira os repositórios para uma organização do GitHub que você controla.
