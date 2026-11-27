@@ -6,8 +6,8 @@ Registro de continuidade do **Essentials**, atualizado em **24/11/2026**. A fase
 
 O cliente quer acompanhar cada pedido desde a venda até a entrega. O app de campo registra pedidos em Android e iOS, inclusive sem internet. O administrativo centraliza a fila dos vendedores e do balcão, o acompanhamento de entregas, os usuários, o estoque e as consultas financeiras do piloto.
 
-- [amendoas--adm](https://github.com/prpaulocesarneves-crypto/amendoas--adm) guarda o administrativo, a documentação compartilhada e o [mapa de decisões](https://github.com/prpaulocesarneves-crypto/amendoas--adm/issues/1).
-- [amendoas-app](https://github.com/prpaulocesarneves-crypto/amendoas-app) é o repositório do app do vendedor.
+- [amendoas-adm](https://github.com/ismaelsouza/amendoas-adm) guarda o administrativo e a API.
+- [amendoas-app](https://github.com/ismaelsouza/amendoas-app) guarda o app do vendedor. O [mapa de decisões](https://github.com/prpaulocesarneves-crypto/amendoas--adm/issues/1) e as discussões anteriores continuam nos repositórios de origem.
 - ReactJS para a interface e MySQL ou MariaDB para a base central foram sugeridos. A tecnologia do app, a escolha do banco e a tecnologia, localização e contrato da API compartilhada estão em aberto. A API deverá receber pedidos sincronizados e aplicar as regras comuns aos canais.
 
 ## Regras confirmadas
