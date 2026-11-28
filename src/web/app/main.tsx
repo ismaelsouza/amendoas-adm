@@ -9,6 +9,7 @@ import { perfisEstoque } from '../../contracts/stock.js';
 import { CadastrosPendentes, useTotalCadastrosPendentes } from '../pages/cadastros/pendentes.js';
 import { Estoque } from '../pages/estoque/index.js';
 import { Pedidos } from '../pages/pedidos/index.js';
+import { Produtos } from '../pages/produtos/index.js';
 import { Usuarios } from '../pages/usuarios/index.js';
 import { api, json } from '../shared/api/index.js';
 import { tokenDoLogin } from './recaptcha.js';
@@ -94,11 +95,11 @@ function Login({ ambiente, onLogin }: { ambiente: Ambiente; onLogin: (usuario: U
 function App() {
   const [ambiente, setAmbiente] = useState<Ambiente>(() => ambientePorHost());
   const [usuario, setUsuario] = useState<Usuario | null | undefined>(undefined);
-  const [tela, setTela] = useState<'pedidos' | 'estoque' | 'usuarios' | 'cadastros'>('pedidos');
+  const [tela, setTela] = useState<'pedidos' | 'estoque' | 'usuarios' | 'cadastros' | 'produtos'>('pedidos');
   const [erro, setErro] = useState('');
   const [saindo, setSaindo] = useState(false);
-  const podeConferirCadastro = usuario?.perfil === 'administrador';
-  const pendencias = useTotalCadastrosPendentes(podeConferirCadastro);
+  const administrador = usuario?.perfil === 'administrador';
+  const pendencias = useTotalCadastrosPendentes(administrador);
 
   useEffect(() => {
     void api('/ambiente', (value) => parse(ambienteSchema, value)).then((resultado) => {
@@ -110,9 +111,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const base = 'Pedidos | Casa das Amêndoas';
+    const base = `${tela === 'produtos' ? 'Produtos' : 'Pedidos'} | Casa das Amêndoas`;
     document.title = ambiente === 'dsv' ? `[DSV] ${base}` : base;
-  }, [ambiente]);
+  }, [ambiente, tela]);
 
   async function sair() {
     setSaindo(true);
@@ -143,10 +144,11 @@ function App() {
       <div className="shell">
         <button type="button" aria-current={tela === 'pedidos' ? 'page' : undefined} onClick={() => setTela('pedidos')}>Pedidos</button>
         {podeOperarEstoque && <button type="button" aria-current={tela === 'estoque' ? 'page' : undefined} onClick={() => setTela('estoque')}>Estoque</button>}
-        {podeConferirCadastro && <button type="button" aria-current={tela === 'cadastros' ? 'page' : undefined} onClick={() => setTela('cadastros')}>
+        {administrador && <button type="button" aria-current={tela === 'produtos' ? 'page' : undefined} onClick={() => setTela('produtos')}>Produtos</button>}
+        {administrador && <button type="button" aria-current={tela === 'cadastros' ? 'page' : undefined} onClick={() => setTela('cadastros')}>
           Cadastros{pendencias.total > 0 && <span className="contador-cadastros"> ({pendencias.total})</span>}
         </button>}
-        {usuario.perfil === 'administrador' && <button type="button" aria-current={tela === 'usuarios' ? 'page' : undefined} onClick={() => setTela('usuarios')}>Usuários</button>}
+        {administrador && <button type="button" aria-current={tela === 'usuarios' ? 'page' : undefined} onClick={() => setTela('usuarios')}>Usuários</button>}
       </div>
     </nav>
     <main className="shell main">
@@ -154,8 +156,9 @@ function App() {
       {tela === 'pedidos' && <Pedidos usuarioId={usuario.id} podeRegistrar={usuario.perfil !== 'estoque'}
         podeExpedir={podeOperarEstoque} podeAutorizar={usuario.perfil === 'administrador' || usuario.perfil === 'gerente'} />}
       {tela === 'estoque' && podeOperarEstoque && <Estoque usuarioId={usuario.id} />}
-      {tela === 'cadastros' && podeConferirCadastro && <CadastrosPendentes aoAtualizar={pendencias.atualizar} />}
-      {tela === 'usuarios' && usuario.perfil === 'administrador' && <Usuarios usuarioAtual={usuario} />}
+      {tela === 'produtos' && administrador && <Produtos usuarioId={usuario.id} />}
+      {tela === 'cadastros' && administrador && <CadastrosPendentes aoAtualizar={pendencias.atualizar} />}
+      {tela === 'usuarios' && administrador && <Usuarios usuarioAtual={usuario} />}
     </main>
   </>;
 }

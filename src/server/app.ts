@@ -6,6 +6,7 @@ import { rateLimit } from 'express-rate-limit';
 import type { Pool } from 'mariadb';
 import * as v from 'valibot';
 import { cancelarSaldoSchema, perfisCancelamento } from '../contracts/cancellations.js';
+import { novoProdutoSchema } from '../contracts/catalogo.js';
 import { perfisCorrecao, solicitarCorrecaoSchema } from '../contracts/corrections.js';
 import { recebimentoSchema } from '../contracts/delivery.js';
 import { saidaEstoqueSchema } from '../contracts/dispatch.js';
@@ -22,6 +23,7 @@ import {
 } from './accounts.js';
 import type { Canal } from './accounts.js';
 import { registrarCancelamento } from './cancellations.js';
+import { cadastrarProduto, listarProdutos } from './catalogo.js';
 import { aprovarCorrecao, consultarCorrecoes, solicitarCorrecao } from './corrections.js';
 import { consultarEntregas, registrarRecebimento, resumoParaVendedor } from './delivery.js';
 import { consultarExpedicao, registrarSaida } from './dispatch.js';
@@ -171,6 +173,17 @@ export function createApp(db: Pool, {
     const cursor = v.safeParse(v.optional(validarId), req.query.antesDe);
     if (!cursor.success) return erro(res, 400, 'Página inválida.');
     res.json(await listarPedidos(db, cursor.output));
+  });
+  api.get('/produtos', async (req, res) => {
+    if (await autorizar(req, res, 'web', ['administrador'])) res.json({ produtos: await listarProdutos(db) });
+  });
+  api.post('/produtos', async (req, res) => {
+    if (!await autorizar(req, res, 'web', ['administrador'])) return;
+    const dados = v.safeParse(novoProdutoSchema, req.body);
+    if (!dados.success) return erro(res, 400, 'Confira nome do produto, apresentação, unidade e preço padrão.');
+    const resultado = await cadastrarProduto(db, dados.output);
+    if (!resultado.success) return erro(res, 409, 'Este envio já foi usado para cadastrar outro produto.');
+    res.status(resultado.criado ? 201 : 200).json(resultado.data);
   });
   api.get('/cadastros/balcao', async (req, res) => {
     if (await autorizar(req, res, 'web', balcaoPerfis)) res.json(await listarCadastros(db));

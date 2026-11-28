@@ -4,6 +4,7 @@ import * as v from 'valibot';
 import type { Perfil } from '../../contracts/pilot.js';
 import { hashPassword } from '../password.js';
 import { openDb } from './config.js';
+import { vincularApresentacoesLegadas } from './init.js';
 
 export async function seedPilot(
   db: Pool, senha: string, { resetPilotPasswords = false } = {},
@@ -27,6 +28,7 @@ export async function seedPilot(
     (1, 'Castanha de caju · 250 g', 'pacote', 1875),
     (2, 'Castanha a granel', 'kg', 2988)
     ON DUPLICATE KEY UPDATE id = id`);
+  await vincularApresentacoesLegadas(db);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
@@ -41,4 +43,3 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     await db.end();
   }
 }
-
