@@ -45,7 +45,10 @@ export function Pedidos({ usuarioId, podeRegistrar, podeExpedir, podeAutorizar }
 
   return <>
     <div className="page-header">
-      <h1>Fila de pedidos</h1>
+      <div>
+        <h1>Fila de pedidos</h1>
+        <p>Vendas de campo e de balcão no mesmo lugar.</p>
+      </div>
       <div className="actions">
         <button type="button" className="secondary" disabled={carregando} onClick={() => void carregar()}>Atualizar fila</button>
         {podeRegistrar && !novo && <button type="button" onClick={() => { setNovo(true); setConfirmado(null); }}>Novo pedido de balcão</button>}
@@ -59,7 +62,10 @@ export function Pedidos({ usuarioId, podeRegistrar, podeExpedir, podeAutorizar }
     }} />}
     {erro && <p className="erro" role="alert">{erro}</p>}
     {carregando && <p className="status" role="status">Carregando pedidos…</p>}
-    {!carregando && !erro && pedidos.length === 0 && <p className="panel">A fila ainda está vazia.</p>}
+    {!carregando && !erro && pedidos.length === 0 && <div className="panel empty-state">
+      <h2>A fila ainda está vazia.</h2>
+      <p>Os pedidos registrados pelo vendedor ou no balcão aparecem aqui.</p>
+    </div>}
     {pedidos.length > 0 && <div className="fila">
       <div className="fila-head" aria-hidden="true"><span>Pedido</span><span>Supermercado</span><span>Origem</span><span>Responsável</span><span>Fechamento</span></div>
       {pedidos.map((pedido) => {
@@ -78,7 +84,7 @@ export function Pedidos({ usuarioId, podeRegistrar, podeExpedir, podeAutorizar }
         </summary>
         <div className="pedido-detail">
           {pedido.retiradaImediata && <p className="retirada">Retirada imediata no balcão</p>}
-          <table aria-label="Itens vigentes">
+          <table className="itens-pedido" aria-label="Itens vigentes">
             <thead><tr><th scope="col">Apresentação</th><th scope="col">Quantidade</th><th scope="col">Preço unitário</th></tr></thead>
             <tbody>{pedido.itens.map((item) => <tr key={item.apresentacaoId}>
               <td>{item.apresentacao}</td>
