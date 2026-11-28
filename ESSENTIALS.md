@@ -10,8 +10,13 @@ O cliente está validando a primeira miniversão em HML. A rodada cobre o pedido
 | Painel e API | [Especificação e subtarefas do ADM](https://github.com/ismaelsouza/amendoas-adm/issues/12) |
 | PWA e APK | [Especificação e subtarefas do App](https://github.com/ismaelsouza/amendoas-app/issues/1) |
 | CI/CD | [Fluxo de publicação](https://github.com/ismaelsouza/amendoas-adm/issues/11) |
+| Próximo layout dos dois canais | [Revisão visual](https://github.com/ismaelsouza/amendoas-adm/issues/20) |
 
 Os novos repositórios concentram as Issues e o histórico de decisões. `awaiting-homologation` identifica as entregas publicadas que aguardam aceite. Registre resultados nas Issues correspondentes, usando dados fictícios. Em paralelo, o trabalho novo segue em `feature/*` e `develop`, com deploy automático em DSV. A primeira promoção automatizada para HML passa por `release` após o aceite funcional em DSV.
+
+O [glossário](GLOSSARY.md) consolida os termos já confirmados nas discussões. As decisões de [preservar a identidade da venda offline](docs/adr/0001-identidade-da-venda-offline.md) e [baixar na saída física sem reserva antecipada](docs/adr/0002-baixa-na-saida-fisica.md) têm registros próprios. Os termos de conversão, produção e financeiro descrevem o domínio das miniversões seguintes.
+
+Na [saída física](https://github.com/ismaelsouza/amendoas-adm/issues/16), a API já limita a remessa ao saldo dos lotes e ao que falta despachar por pedido. O alerta à produção pela falta somada dos pedidos ainda não aparece no painel. O lembrete da [entrega parcial](https://github.com/ismaelsouza/amendoas-adm/issues/17) segue pendente. A revisão visual pode seguir em DSV após a revisão dos PRs. A proposta de identidade ainda precisa ser comparada com os materiais de marca do cliente.
 
 <details>
 <summary>Registro histórico de 24/11/2026</summary>
