@@ -10,6 +10,7 @@ import { perfisCorrecao, solicitarCorrecaoSchema } from '../contracts/correction
 import { recebimentoSchema } from '../contracts/delivery.js';
 import { saidaEstoqueSchema } from '../contracts/dispatch.js';
 import { cnpjSchema, novoClienteCampoSchema } from '../contracts/field-customers.js';
+import { loginWebSchema } from '../contracts/login-web.js';
 import {
   alterarUsuarioSchema, loginSchema, novoUsuarioSchema, vendaBalcaoSchema, vendaCampoSchema,
 } from '../contracts/pilot.js';
@@ -28,6 +29,7 @@ import { consultarCatalogoDoCliente, listarApresentacoesDeCampo, listarClientesD
 import { cadastrarClienteCampo, conferirClienteCampo, listarCadastrosPendentes, totalCadastrosPendentes } from './field-customers.js';
 import { consultarPedidoDoVendedor, isDuplicate, listarCadastros, listarPedidos, listarPedidosDoVendedor, registrarPedido } from './orders.js';
 import { consultarDevolucoes, registrarDevolucao } from './returns.js';
+import type { Recaptcha } from './recaptcha.js';
 import { consultarEntrada, consultarSaldos, listarApresentacoesEstoque, registrarEntrada } from './stock.js';
 
 const cookieName = 'amendoas_sessao';
@@ -35,6 +37,15 @@ const tokenFormat = /^[A-Za-z0-9_-]{43}$/;
 const filaPerfis: Perfil[] = ['administrador', 'gerente', 'estoque', 'balcao'];
 const balcaoPerfis: Perfil[] = ['administrador', 'gerente', 'balcao'];
 const validarId = v.pipe(v.string(), v.regex(/^[1-9]\d{0,9}$/), v.transform(Number), v.maxValue(4_294_967_295));
+const verificacaoIndisponivel = 'A verificação do login do ADM está indisponível. Tente novamente em instantes.';
+
+function criarLimiteLogin() {
+  return rateLimit({
+    windowMs: 60_000, limit: 12, skipSuccessfulRequests: true,
+    standardHeaders: 'draft-8', legacyHeaders: false,
+    message: { mensagem: 'Muitas tentativas. Aguarde um minuto.' },
+  });
+}
 
 function tokenDe(req: Request, canal: Canal): string | undefined {
   const token = canal === 'app'
@@ -64,9 +75,10 @@ function responderCorrecao(res: Response, r: Awaited<ReturnType<typeof solicitar
 }
 
 export function createApp(db: Pool, {
-  secureCookie, trustLoopbackProxy = false, ambiente = 'prd', agora = () => new Date(),
+  secureCookie, trustLoopbackProxy = false, ambiente = 'prd', agora = () => new Date(), recaptcha = null,
 }: {
   secureCookie: boolean; trustLoopbackProxy?: boolean; ambiente?: Ambiente; agora?: () => Date;
+  recaptcha?: Recaptcha | null;
 }): express.Express {
   const app = express();
   app.disable('x-powered-by');
@@ -113,15 +125,23 @@ export function createApp(db: Pool, {
   }
 
   const cookieOptions = { httpOnly: true, sameSite: 'strict' as const, secure: secureCookie, path: '/api/v1' };
-  const limiteLogin = rateLimit({
-    windowMs: 60_000, limit: 12, skipSuccessfulRequests: true,
-    standardHeaders: 'draft-8', legacyHeaders: false,
-    message: { mensagem: 'Muitas tentativas. Aguarde um minuto.' },
+  const limiteLogin = criarLimiteLogin();
+  const limiteWeb = recaptcha === null ? limiteLogin : criarLimiteLogin();
+  api.get('/sessao/web/configuracao', (_req, res) => {
+    if (recaptcha === 'invalida') return erro(res, 503, verificacaoIndisponivel);
+    res.json({ chaveRecaptcha: recaptcha?.chave ?? null });
   });
   for (const canal of ['app', 'web'] as const) {
-    api.post('/sessao/' + canal, limiteLogin, async (req, res) => {
-      const dados = v.safeParse(loginSchema, req.body);
+    api.post('/sessao/' + canal, canal === 'web' ? limiteWeb : limiteLogin, async (req, res) => {
+      const dados = v.safeParse(canal === 'web' ? loginWebSchema : loginSchema, req.body);
       if (!dados.success) return erro(res, 400, 'Informe o login e a senha.');
+      if (canal === 'web' && recaptcha) {
+        if (recaptcha === 'invalida') return erro(res, 503, verificacaoIndisponivel);
+        const token = 'tokenRecaptcha' in dados.output ? dados.output.tokenRecaptcha : undefined;
+        const verificacao = typeof token === 'string' ? await recaptcha.verificar(token) : 'recusada';
+        if (verificacao === 'indisponivel') return erro(res, 503, 'A verificação do Google está indisponível. Tente novamente em instantes.');
+        if (verificacao === 'recusada') return erro(res, 403, 'Não foi possível validar esta tentativa. Tente entrar novamente.');
+      }
       const { login, senha } = dados.output;
       const sessao = await criarSessao(db, canal, login, senha);
       if (!sessao) return erro(res, 401, 'Login ou senha inválidos para este aplicativo.');

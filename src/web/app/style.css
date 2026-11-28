@@ -48,6 +48,9 @@ h3 { font-size: 1rem; margin: 0; }
 .login-header { padding: 1.1rem 1.4rem; }
 .login h1 { font-size: 2rem; }
 .login form { display: grid; gap: 1.15rem; }
+.login-recaptcha { color: var(--secondary); margin: 0; font-size: .82rem; }
+.login-recaptcha a { color: var(--ink); text-underline-offset: .15em; }
+.grecaptcha-badge { visibility: hidden; }
 .panel { border: 1px solid var(--border); border-radius: .5rem; background: var(--paper); padding: clamp(.9rem, 3vw, 1.6rem); }
 .form-panel { display: grid; max-width: 41rem; gap: 1.15rem; margin-bottom: 1.5rem; }
 [hidden] { display: none !important; }

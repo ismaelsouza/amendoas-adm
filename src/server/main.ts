@@ -1,6 +1,7 @@
 import * as v from 'valibot';
 import { createApp } from './app.js';
 import { openDb } from './db/config.js';
+import { configurarRecaptcha } from './recaptcha.js';
 
 const config = v.parse(v.object({
   HOST: v.optional(v.string(), '127.0.0.1'),
@@ -10,6 +11,10 @@ const config = v.parse(v.object({
   TRUST_LOOPBACK_PROXY: v.optional(v.picklist(['true', 'false']), 'false'),
 }), process.env);
 
+const recaptcha = configurarRecaptcha(process.env);
+if (recaptcha === 'invalida') {
+  console.error('Configuração incompleta ou inválida do reCAPTCHA. O login do ADM está indisponível.');
+}
 const db = openDb();
 try {
   await db.query('SELECT 1 FROM usuarios LIMIT 1');
@@ -20,6 +25,7 @@ try {
     ambiente: config.APP_ENV,
     secureCookie: config.SECURE_COOKIE === 'true',
     trustLoopbackProxy: config.TRUST_LOOPBACK_PROXY === 'true',
+    recaptcha,
   });
   const listener = server.listen(config.PORT, config.HOST, () => {
     console.log(`Administrativo disponível em ${config.HOST}:${config.PORT}`);
