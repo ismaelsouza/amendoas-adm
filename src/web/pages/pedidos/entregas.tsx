@@ -169,10 +169,10 @@ export function EntregasPedido({ pedidoNumero, usuarioId, podeConfirmarQualquerR
     {consultando && <p role="status">Consultando entregas…</p>}
     {entregas && <>
       <p><strong>{situacaoEntrega[entregas.situacao]}</strong></p>
-      <div className="table-panel">
+      <div className="table-panel" tabIndex={0} role="region" aria-label="Quantidades por apresentação">
         <table aria-label="Balanço das entregas">
           <thead><tr><th>Apresentação</th><th>Pedida</th><th>Despachada</th><th>Recebida</th><th>Recusada</th>
-            <th>Cancelada</th><th>Sem confirmação</th><th>A despachar</th><th>A receber</th></tr></thead>
+            <th>Cancelada</th><th>Em trânsito</th><th>A despachar</th><th>A receber</th></tr></thead>
           <tbody>{entregas.itens.map((item) => <tr key={item.apresentacaoId}><th scope="row">{item.apresentacao}</th>
             {[item.pedida, item.despachada, item.recebida, item.recusada, item.cancelada, item.emTransito, item.pendenteDespacho, item.pendenteRecebimento]
               .map((qtd, indice) => <td key={indice}>{br(qtd)} {item.unidade}</td>)}
