@@ -27,6 +27,18 @@ const tables = [
     unidade ENUM('pacote', 'caixa', 'kg') NOT NULL,
     preco_padrao_centavos INT UNSIGNED NOT NULL
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS produtos (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(120) NOT NULL,
+    cadastro_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NULL UNIQUE,
+    cadastro_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NULL,
+    apresentacao_legada_id INT UNSIGNED NULL UNIQUE REFERENCES apresentacoes(id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS produtos_apresentacoes (
+    apresentacao_id INT UNSIGNED PRIMARY KEY REFERENCES apresentacoes(id),
+    produto_id INT UNSIGNED NOT NULL REFERENCES produtos(id),
+    KEY por_produto (produto_id, apresentacao_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS cnpjs_clientes (
     cliente_id INT UNSIGNED PRIMARY KEY REFERENCES clientes(id),
     cnpj CHAR(14) CHARACTER SET ascii COLLATE ascii_bin NOT NULL UNIQUE
@@ -205,8 +217,29 @@ const tables = [
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 ];
 
+export async function vincularApresentacoesLegadas(db: Pool): Promise<void> {
+  const conexao = await db.getConnection();
+  try {
+    await conexao.beginTransaction();
+    await conexao.query(`INSERT INTO produtos (nome, apresentacao_legada_id)
+      SELECT a.apresentacao, a.id FROM apresentacoes a
+      WHERE NOT EXISTS (SELECT 1 FROM produtos_apresentacoes pa WHERE pa.apresentacao_id = a.id)
+      ORDER BY a.id ON DUPLICATE KEY UPDATE apresentacao_legada_id = VALUES(apresentacao_legada_id)`);
+    await conexao.query(`INSERT INTO produtos_apresentacoes (apresentacao_id, produto_id)
+      SELECT apresentacao_legada_id, id FROM produtos WHERE apresentacao_legada_id IS NOT NULL
+      ON DUPLICATE KEY UPDATE apresentacao_id = VALUES(apresentacao_id)`);
+    await conexao.commit();
+  } catch (error) {
+    await conexao.rollback();
+    throw error;
+  } finally {
+    conexao.release();
+  }
+}
+
 export async function initDb(db: Pool): Promise<void> {
   for (const table of tables) await db.query(table);
+  await vincularApresentacoesLegadas(db);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

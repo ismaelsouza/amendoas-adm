@@ -30,6 +30,12 @@ Cadastre o domínio do painel no [console do Google](https://www.google.com/reca
 
 Com todos os campos vazios, o login web funciona só com as credenciais. Uma configuração parcial ou inválida gera um erro no log de inicialização e bloqueia o login web. Com a proteção habilitada, a verificação acontece ao pressionar **Entrar**. Se o Google estiver indisponível, o formulário orienta a tentar novamente. O login do app continua com login e senha, e as falhas na verificação web não consomem seu limite de tentativas.
 
+### Cadastro de produtos · ADM #24
+
+Em **Produtos → Novo produto**, o administrador informa o nome e a primeira apresentação, com unidade e preço padrão em reais. Depois de salvar, abra a ficha na grade para conferir os dados. A apresentação fica disponível para os fluxos de venda e estoque, sem saldo inicial.
+
+`db:init` cria uma ficha para cada apresentação sem vínculo, preservando a unidade, o preço e os identificadores usados por pedidos e estoque. Apresentações antigas com o mesmo nome ficam em fichas distintas. A atualização pode ser reaplicada.
+
 ## Envio pelo app
 
 1. `POST /api/v1/sessao/app` recebe JSON com `login` e `senha`. Retorna `token` e `usuario`. Envie `Authorization: Bearer <token>` nas chamadas do app.
@@ -146,6 +152,7 @@ Só a quantidade apta e dentro da validade é acrescida ao mesmo lote. O histór
 | Autorizar correção antes da primeira saída | Administrador e gerente |
 | Registrar e consultar devoluções | Administrador, gerente e estoque |
 | Gerenciar contas | Administrador |
+| Consultar e cadastrar produtos | Administrador |
 | Conferir novos cadastros de campo | Administrador |
 | Cadastrar supermercado pelo app | Vendedor |
 | Enviar e consultar as próprias vendas | Vendedor |
