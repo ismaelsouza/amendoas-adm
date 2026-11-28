@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import { parse } from 'valibot';
+import { loginWebConfigSchema } from '../../contracts/login-web.js';
 import { ambienteSchema, sessaoSchema } from '../../contracts/pilot.js';
 import type { Ambiente, Usuario } from '../../contracts/pilot.js';
 import { perfisEstoque } from '../../contracts/stock.js';
@@ -10,6 +11,7 @@ import { Estoque } from '../pages/estoque/index.js';
 import { Pedidos } from '../pages/pedidos/index.js';
 import { Usuarios } from '../pages/usuarios/index.js';
 import { api, json } from '../shared/api/index.js';
+import { tokenDoLogin } from './recaptcha.js';
 import './style.css';
 
 function Identidade() {
@@ -25,21 +27,48 @@ function ambientePorHost(): Ambiente {
   return /(?:^|\.)[^.]*-dsv\./i.test(window.location.hostname) ? 'dsv' : 'prd';
 }
 
+function consultarConfiguracaoLogin() {
+  return api('/sessao/web/configuracao', (value) => parse(loginWebConfigSchema, value));
+}
+
 function Login({ ambiente, onLogin }: { ambiente: Ambiente; onLogin: (usuario: Usuario) => void }) {
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [protegeComGoogle, setProtegeComGoogle] = useState(false);
+
+  useEffect(() => {
+    void consultarConfiguracaoLogin().then((config) => {
+      if (config.success && config.data.chaveRecaptcha) setProtegeComGoogle(true);
+    });
+  }, []);
 
   async function entrar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (enviando) return;
     const dados = new FormData(event.currentTarget);
     setEnviando(true);
-    const resultado = await api('/sessao/web', (value) => parse(sessaoSchema, value), json('POST', {
-      login: dados.get('login'),
-      senha: dados.get('senha'),
-    }));
-    setEnviando(false);
-    if (resultado.success) onLogin(resultado.data);
-    else setErro(resultado.mensagem);
+    setErro('');
+    try {
+      const config = await consultarConfiguracaoLogin();
+      if (!config.success) return setErro(config.mensagem);
+      const chave = config.data.chaveRecaptcha;
+      setProtegeComGoogle(chave !== null);
+      const tokenRecaptcha = chave ? await tokenDoLogin(chave) : undefined;
+      const resultado = await api('/sessao/web', (value) => parse(sessaoSchema, value), json('POST', {
+        login: dados.get('login'), senha: dados.get('senha'), tokenRecaptcha,
+      }));
+      if (!resultado.success) return setErro(resultado.mensagem);
+      if (chave) {
+        // A sessão já está no cookie. Recarregue sem levar o script do Google para o painel.
+        window.location.reload();
+      } else {
+        onLogin(resultado.data);
+      }
+    } catch {
+      setErro('Não foi possível carregar a verificação do Google. Confira a conexão e tente novamente.');
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return <>
@@ -52,6 +81,11 @@ function Login({ ambiente, onLogin }: { ambiente: Ambiente; onLogin: (usuario: U
         <label>Senha<input name="senha" type="password" autoComplete="current-password" required maxLength={128} /></label>
         {erro && <p role="alert" className="erro">{erro}</p>}
         <button disabled={enviando} type="submit">{enviando ? 'Entrando…' : 'Entrar'}</button>
+        {protegeComGoogle && <p className="login-recaptcha">
+          Este site é protegido pelo reCAPTCHA. Aplicam-se a{' '}
+          <a href="https://policies.google.com/privacy">Política de Privacidade</a> e os{' '}
+          <a href="https://policies.google.com/terms">Termos de Serviço</a> do Google.
+        </p>}
       </form>
     </main>
   </>;

@@ -24,6 +24,12 @@ O Dockerfile empacota a interface e a API. Após criar o banco, execute `docker 
 
 Ao atualizar uma base que já recebe pedidos, execute `db:init` antes de iniciar a nova imagem. Use uma conta de manutenção autorizada a criar tabelas. O esquema acrescenta as tabelas de estoque, entregas, devoluções, correções, CNPJ e preços negociados sem regravar pedidos, usuários ou cadastros. A conta da aplicação em execução não precisa da permissão `CREATE`.
 
+### Login web com reCAPTCHA v3 · ADM #23
+
+Cadastre o domínio do painel no [console do Google](https://www.google.com/recaptcha/admin/create) e configure `RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET_KEY` e `RECAPTCHA_HOSTNAMES` no ambiente do ADM. Em DSV, use uma chave própria para `amendoas-adm-dsv.homologacao-app.com.br` no arquivo `/etc/amendoas/adm-dsv.env`. Informe apenas os hostnames, separados por vírgula quando houver mais de um. `RECAPTCHA_MIN_SCORE` é opcional e usa `0.5` por padrão. Guarde a chave secreta fora do Git.
+
+Com todos os campos vazios, o login web funciona só com as credenciais. Uma configuração parcial ou inválida gera um erro no log de inicialização e bloqueia o login web. Com a proteção habilitada, a verificação acontece ao pressionar **Entrar**. Se o Google estiver indisponível, o formulário orienta a tentar novamente. O login do app continua com login e senha, e as falhas na verificação web não consomem seu limite de tentativas.
+
 ## Envio pelo app
 
 1. `POST /api/v1/sessao/app` recebe JSON com `login` e `senha`. Retorna `token` e `usuario`. Envie `Authorization: Bearer <token>` nas chamadas do app.
