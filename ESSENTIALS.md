@@ -1,6 +1,22 @@
 # Casa das Amêndoas
 
-Registro de continuidade do **Essentials**, atualizado em **24/11/2026**. A fase atual é de especificação para o piloto. Regras aprovadas aqui descrevem o comportamento esperado do produto.
+## Estado em 28/11/2026
+
+O cliente está validando a primeira miniversão em HML. A rodada cobre o pedido offline, a fila comum, o estoque por lote, o despacho, a entrega e a devolução. O aceite no aparelho e os resultados por cenário ainda estão pendentes.
+
+| Acompanhar | Issues |
+| --- | --- |
+| Decisões e próximas miniversões | [Mapa do Essentials](https://github.com/ismaelsouza/amendoas-adm/issues/1) |
+| Painel e API | [Especificação e subtarefas do ADM](https://github.com/ismaelsouza/amendoas-adm/issues/12) |
+| PWA e APK | [Especificação e subtarefas do App](https://github.com/ismaelsouza/amendoas-app/issues/1) |
+| CI/CD | [Fluxo de publicação](https://github.com/ismaelsouza/amendoas-adm/issues/11) |
+
+Os novos repositórios concentram as Issues e o histórico de decisões. `awaiting-homologation` identifica as entregas publicadas que aguardam aceite. Registre resultados nas Issues correspondentes, usando dados fictícios. Em paralelo, o trabalho novo segue em `feature/*` e `develop`, com deploy automático em DSV. A primeira promoção automatizada para HML passa por `release` após o aceite funcional em DSV.
+
+<details>
+<summary>Registro histórico de 24/11/2026</summary>
+
+As seções abaixo registram a etapa de especificação. Para decisões atualizadas e próximas ações, consulte as Issues acima.
 
 ## Objetivo e repositórios
 
@@ -67,3 +83,5 @@ O [AGENTS.md](AGENTS.md) descreve como manter as decisões e pendências atualiz
 
 - **24/11/2026.** O responsável pelo projeto confirmou que a empresa assume a comissão nas devoluções após o faturamento. Essa decisão encerra a proposta de estornar a comissão já devida. O financeiro registra o motivo da devolução e o valor devido ao cliente, que recebe o reembolso sem dedução da comissão. [Confirmação no financeiro #10](https://github.com/prpaulocesarneves-crypto/amendoas--adm/issues/10#issuecomment-7142424670)
 - **24/11/2026.** Consolidação inicial das decisões, do questionário e das pendências dos dois canais. A escolha de manter os itens disponíveis até a saída encerrou a discussão sobre reserva antecipada para o piloto. A regra aprovada de manter o preço registrado resolveu a possibilidade de substituição automática do preço na sincronização. [Estoque #6](https://github.com/prpaulocesarneves-crypto/amendoas--adm/issues/6#issuecomment-7141298985) · [Questionário](https://github.com/prpaulocesarneves-crypto/amendoas--adm/issues/1#issuecomment-7140936481)
+
+</details>

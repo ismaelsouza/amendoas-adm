@@ -2,7 +2,7 @@
 
 O administrativo do Essentials reúne pedidos do app e do balcão, registra movimentações por lote e acompanha entregas e devoluções por remessa. A API também autentica usuários, gerencia perfis e permite ao vendedor consultar os próprios pedidos.
 
-Consulte o [registro do Essentials](ESSENTIALS.md) e o [mapa de decisões](https://github.com/prpaulocesarneves-crypto/amendoas--adm/issues/1) do repositório de origem. O [app do vendedor](https://github.com/ismaelsouza/amendoas-app) fica em outro repositório.
+Consulte o [estado do Essentials](ESSENTIALS.md) e o [mapa de decisões](https://github.com/ismaelsouza/amendoas-adm/issues/1). O [app do vendedor](https://github.com/ismaelsouza/amendoas-app) fica em outro repositório.
 
 ## Executar o piloto local
 
